@@ -62,7 +62,7 @@ def get_sim_df(temp_path):
 		cell_df_list = []
 		conc_df_list  = []
 		for i, xml in enumerate(sorted(xmls)):
-				mcds = pcdl.TimeStep(xml)
+				mcds = pcdl.TimeStep(xml,graph=False)
 				cell_df = mcds.get_cell_df()
 				conc_df = mcds.get_conc_df()
 				cell_df[["timestep"]] = i
