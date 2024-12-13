@@ -10,7 +10,6 @@ from scipy.stats import qmc
 
 XML_FILE = 'config/PhysiCell_settings.xml'
 OUTPUT_PATH = '/nfs/turbo/umms-ukarvind/joelne/mm_sims'
-THETA_SEED = 1234 # same seed to generate theta in all tasks
 
 params_dict = {
 		'macrophage_max_recruitment_rate': [0,8e-9],
@@ -25,11 +24,11 @@ params_dict = {
 		'DM_decay': [0,7e-4]
 }
 
-def generate_theta(n_samples):
+def generate_theta(n_samples,seed_start):
 		prior_min = [x[0] for x in params_dict.values()]
 		prior_max = [x[1] for x in params_dict.values()]
 		d = len(prior_min)
-		sampler = qmc.Sobol(d=d, scramble=False, seed = THETA_SEED)
+		sampler = qmc.Sobol(d=d, scramble=False, seed = seed_start)
 		sample = sampler.random_base2(m=int(np.log2(n_samples)))
 		sample = qmc.scale(sample,prior_min, prior_max)
 
@@ -74,15 +73,17 @@ def main():
 		parser = argparse.ArgumentParser()
 		parser.add_argument('--theta_id', type=int, default=0)
 		parser.add_argument('--n_samples', type=int, default=1000)
-		parser.add_argument('--seed', type=int, default=1234)
+		parser.add_argument('--seed_start', type=int, default=1234)
 
 		args = parser.parse_args()
 		theta_id = args.theta_id
-		seed = args.seed
+		seed_start = args.seed_start
 		n_samples = args.n_samples
+
+		seed = seed_start + theta_id
 		
 		# generate theta
-		theta = generate_theta(n_samples)
+		theta = generate_theta(n_samples,seed_start)
 		params = theta[theta_id,]
 
 		# run simulations
