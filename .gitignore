@@ -12,3 +12,4 @@
 *.pickle
 *.ipynb_checkpoints*
 .DS_Store
+micromets_immuno
