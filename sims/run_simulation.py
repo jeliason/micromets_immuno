@@ -44,7 +44,14 @@ def config_files(temp_path,
 
 		xml_root.find('.//user_parameters').find('.//random_seed').text = str(seed)
 
+		if params[1] > params[2]:
+				params[1], params[2] = params[2], params[1]
+		
+		if params[4] > params[5]:
+				params[4], params[5] = params[5], params[4]
+
 		for i,key in enumerate(params_dict.keys()):
+				
 				xml_root.find('.//user_parameters').find('.//' + key).text = str(params[i])
 
 		tree.write(temp_path + '/PhysiCell_settings.xml')
