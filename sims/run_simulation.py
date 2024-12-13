@@ -104,9 +104,10 @@ def main():
 				
 				print("running physicell")
 				subprocess.run(['./micromets_immuno',
-												 temp_path + '/PhysiCell_settings.xml'],
-												 stderr=subprocess.DEVNULL,
-												 stdout=subprocess.DEVNULL)
+												 temp_path + '/PhysiCell_settings.xml']
+												#  stderr=subprocess.DEVNULL,
+												#  stdout=subprocess.DEVNULL
+												)
 
 				print("getting outputs")
 				cells_df, conc_df = get_sim_df(temp_path)
