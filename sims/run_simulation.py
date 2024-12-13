@@ -1,12 +1,13 @@
 import subprocess
 import xml.etree.ElementTree as ET
-import pandas as pd
 import numpy as np
 import tempfile
 import glob
 import pcdl
 import argparse
 from scipy.stats import qmc
+import pyarrow.parquet as pq
+import pyarrow as pa
 
 XML_FILE = 'config/PhysiCell_settings.xml'
 OUTPUT_PATH = '/nfs/turbo/umms-ukarvind/joelne/mm_sims'
@@ -57,23 +58,79 @@ def config_files(temp_path,
 		tree.write(temp_path + '/PhysiCell_settings.xml')
 
 
-def get_sim_df(temp_path):
-		xmls = [file for file in glob.glob(temp_path + "/output*.xml")]
-		cell_df_list = []
-		conc_df_list  = []
-		for i, xml in enumerate(sorted(xmls)):
-				mcds = pcdl.TimeStep(xml,graph=False)
-				cell_df = mcds.get_cell_df()
-				conc_df = mcds.get_conc_df()
-				cell_df[["timestep"]] = i
-				conc_df[["timestep"]] = i
-				cell_df_list.append(cell_df)
-				conc_df_list.append(conc_df)
-		cells_df = pd.concat(cell_df_list,axis=0)
-		conc_df = pd.concat(conc_df_list,axis=0)
+# def get_sim_df(temp_path):
+# 		xmls = [file for file in glob.glob(temp_path + "/output*.xml")]
+# 		cell_df_list = []
+# 		conc_df_list  = []
+# 		for i, xml in enumerate(sorted(xmls)):
+# 				mcds = pcdl.TimeStep(xml,graph=False)
+# 				cell_df = mcds.get_cell_df()
+# 				conc_df = mcds.get_conc_df()
+# 				cell_df[["timestep"]] = i
+# 				conc_df[["timestep"]] = i
+# 				cell_df_list.append(cell_df)
+# 				conc_df_list.append(conc_df)
+# 		cells_df = pd.concat(cell_df_list,axis=0)
+# 		conc_df = pd.concat(conc_df_list,axis=0)
 
-		print("got sim dfs")
-		return cells_df, conc_df
+# 		print("got sim dfs")
+# 		return cells_df, conc_df
+
+def write_sim_df(temp_path,cell_df_path,conc_df_path):
+    cell_df_columns = [
+        'position_x',
+        'position_y',
+        'cell_type',
+        'total_volume',
+        'current_phase',
+        'nuclear_volume',
+        'sensitivity_to_TNF_chemotaxis',
+        'sensitivity_to_debris_chemotaxis',
+        'debris_secretion_rate',
+        'activated_TNF_secretion_rate',
+        'activated_immune_cell'
+        # 'TNF_decay_rate',
+        # 'debris_decay_rate'
+    ]
+    conc_df_columns = [
+        'mesh_center_m',
+        'mesh_center_n',
+        'TNF',
+        'debris'
+    ]
+    xmls = [file for file in glob.glob(temp_path + "/output*.xml")]
+    writer_cell_df = None
+    writer_conc_df = None
+    compression_codec = "snappy"
+    for i, xml in enumerate(sorted(xmls)):
+        if i < 12:
+            continue
+        mcds = pcdl.TimeStep(xml,graph=False)
+        cell_df = mcds.get_cell_df()
+        conc_df = mcds.get_conc_df()
+
+        cell_df = cell_df[cell_df_columns]
+        conc_df = conc_df[conc_df_columns]
+        
+        cell_df[["timestep"]] = i
+        conc_df[["timestep"]] = i
+
+        table_cell = pa.Table.from_pandas(cell_df)
+        table_conc = pa.Table.from_pandas(conc_df)
+
+        if writer_cell_df is None:
+            writer_cell_df = pq.ParquetWriter(cell_df_path, table_cell.schema, compression=compression_codec)
+            writer_conc_df = pq.ParquetWriter(conc_df_path, table_conc.schema, compression=compression_codec)
+
+        writer_cell_df.write_table(table_cell)
+        writer_conc_df.write_table(table_conc)
+
+    if writer_cell_df is not None:
+        writer_cell_df.close()
+        writer_conc_df.close()
+
+
+    print("wrote sim dfs")
 
 
 def main():
@@ -93,6 +150,9 @@ def main():
 		theta = generate_theta(n_samples,seed_start)
 		params = theta[theta_id,]
 
+		print("thetas: ")
+		print(params)
+
 		# run simulations
 		with tempfile.TemporaryDirectory() as temp_path:
 
@@ -105,15 +165,15 @@ def main():
 				print("running physicell")
 				subprocess.run(['./micromets_immuno',
 												 temp_path + '/PhysiCell_settings.xml']
-												#  stderr=subprocess.DEVNULL,
-												#  stdout=subprocess.DEVNULL
 												)
 
 				print("getting outputs")
-				cells_df, conc_df = get_sim_df(temp_path)
+				cell_df_path = OUTPUT_PATH + '/' + str(theta_id) + '_cells_df.parquet.gzip'
+				conc_df_path = OUTPUT_PATH + '/' + str(theta_id) + '_conc_df.parquet.gzip'
+				write_sim_df(temp_path,cell_df_path,conc_df_path)
 
-		cells_df.to_parquet(OUTPUT_PATH + '/' + str(theta_id) + '_cells_df.parquet.gzip',index=False)
-		conc_df.to_parquet(OUTPUT_PATH + '/' + str(theta_id) + '_conc_df.parquet.gzip',index=False)
+		# cells_df.to_parquet(OUTPUT_PATH + '/' + str(theta_id) + '_cells_df.parquet.gzip',index=False)
+		# conc_df.to_parquet(OUTPUT_PATH + '/' + str(theta_id) + '_conc_df.parquet.gzip',index=False)
 
 
 
