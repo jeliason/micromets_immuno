@@ -25,7 +25,14 @@ params_dict = {
 		'DM_decay': [0,7e-4]
 }
 
+def is_power_of_two(n):
+    if n <= 0:
+        return False
+    return (n & (n - 1)) == 0
+
 def generate_theta(n_samples,seed_start):
+		if not is_power_of_two(n_samples):
+				raise ValueError("n_samples must be a power of 2")
 		prior_min = [x[0] for x in params_dict.values()]
 		prior_max = [x[1] for x in params_dict.values()]
 		d = len(prior_min)
