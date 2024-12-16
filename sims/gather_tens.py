@@ -23,7 +23,7 @@ def make_tensor(sims_df,timestep,grid_size,type=None,x_range=(-400,400),y_range=
 			'G0G1_phase',
 			'G2_phase',
 			'S_phase',
-			'M_phase'
+			'M_phase',
 			'apoptotic'
 		])
 		df['cell_type'] = pd.Categorical(df['cell_type'], categories=cell_types)

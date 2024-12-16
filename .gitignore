@@ -13,3 +13,4 @@
 *.ipynb_checkpoints*
 .DS_Store
 micromets_immuno
+sims/dl_data/*
