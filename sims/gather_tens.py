@@ -6,7 +6,7 @@ total_theta = 256
 theta_ids = range(total_theta)
 grid_size = 128
 num_vars = 20
-timestep = 100
+timestep = 50
 
 def make_tensor(sims_df,timestep,grid_size,type=None,x_range=(-400,400),y_range=(-400,400)):
 	df = sims_df[sims_df['timestep'] == timestep].copy()
