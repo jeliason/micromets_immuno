@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name mm_sim
-#SBATCH --array=0-1279%100 # 1280 total simulations, 100 at a time
+#SBATCH --array=0-1279 # 1280 total simulations, 100 at a time
 #SBATCH --cpus-per-task=1
 #SBATCH --time=1:00:00
 #SBATCH --mem=2G
