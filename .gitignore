@@ -14,3 +14,7 @@
 .DS_Store
 micromets_immuno
 sims/dl_data/*
+.Rproj.user
+*.Rproj
+*.zip
+studio
