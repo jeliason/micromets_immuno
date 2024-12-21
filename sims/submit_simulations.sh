@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name mm_sim
-#SBATCH --array=0-511
+#SBATCH --array=0-1279
 #SBATCH --cpus-per-task=1
 #SBATCH --time=1:00:00
 #SBATCH --mem=2G

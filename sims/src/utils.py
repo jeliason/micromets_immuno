@@ -78,7 +78,7 @@ def get_output_path():
     if system_env == 'laptop':
         return 'sims/dl_data/'
     else:
-        return '/nfs/turbo/umms-ukarvind/joelne/mm_sims/'
+        return '/nfs/turbo/umms-ukarvind/joelne/mm_sims/recruit_rate/'
 
 def expand_grid(**kwargs):
     """
