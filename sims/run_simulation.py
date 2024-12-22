@@ -52,8 +52,8 @@ def write_sim_df(temp_path,cell_df_path,conc_df_path):
 				cell_df[["timestep"]] = i
 				conc_df[["timestep"]] = i
 
-				table_cell = pa.Table.from_pandas(cell_df)
-				table_conc = pa.Table.from_pandas(conc_df)
+				table_cell = pa.Table.from_pandas(cell_df, preserve_index=False)
+				table_conc = pa.Table.from_pandas(conc_df, preserve_index=False)
 
 				if writer_cell_df is None:
 						writer_cell_df = pq.ParquetWriter(cell_df_path, table_cell.schema, compression=compression_codec)
@@ -104,6 +104,9 @@ def main():
 				cell_df_path = OUTPUT_PATH + str(sim_id) + '_cells_df.parquet.gzip'
 				conc_df_path = OUTPUT_PATH + str(sim_id) + '_conc_df.parquet.gzip'
 				write_sim_df(temp_path,cell_df_path,conc_df_path)
+
+		print("running make_array in R")
+		subprocess.run(['Rscript','sims/make_tensor.R',str(sim_id)])
 
 
 

@@ -18,3 +18,4 @@ sims/dl_data/*
 *.Rproj
 *.zip
 studio
+.Rhistory

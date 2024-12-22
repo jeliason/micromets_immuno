@@ -66,6 +66,25 @@ def get_data_layers():
         'debris'
     ]
 
+def get_cell_types():
+    return [
+        'lung_cell',
+        'cancer_cell',
+        'CD8_Tcell',
+        'macrophage',
+        'DC',
+        'CD4_Tcell'
+    ]
+
+def get_phases():
+    return [
+        'G0G1_phase',
+        'G2_phase',
+        'S_phase',
+        'M_phase',
+        'apoptotic'
+    ]
+
 def get_param_ranges():
     params_dict = get_param_dict()
     return torch.tensor([x[1] - x[0] for x in params_dict.values()])
